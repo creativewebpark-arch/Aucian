@@ -1,0 +1,80 @@
+name: Build AUCian APK
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch: {}
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Install JS dependencies
+        run: npm install
+
+      - name: Add Android platform
+        run: npx cap add android
+
+      # Only runs if you added google-services.json as a GitHub secret (see SETUP_GUIDE.md).
+      # Needed for push notifications (FCM) to work.
+      - name: Add Firebase google-services.json
+        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
+        run: echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+
+      # Wires up the Google Services Gradle plugin so google-services.json is
+      # picked up and push notifications (FCM) actually work.
+      - name: Enable Google Services Gradle plugin
+        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
+        run: |
+          sed -i "s#dependencies {#dependencies {\n        classpath 'com.google.gms:google-services:4.4.2'#" android/build.gradle
+          echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
+
+      - name: Generate app icon & splash screen from resources/
+        run: npx @capacitor/assets generate --android
+
+      - name: Sync Capacitor
+        run: npx cap sync android
+
+      - name: Make gradlew executable
+        run: chmod +x android/gradlew
+
+      - name: Build debug APK
+        working-directory: android
+        run: ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk aucian.apk
+
+      - name: Upload APK as build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aucian-apk
+          path: aucian.apk
+
+      - name: Publish APK to a GitHub Release (stable public download link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: latest
+          name: AUCian (latest build)
+          files: aucian.apk
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,9 @@
+{
+  "appId": "com.auc.forauc",
+  "appName": "AUCian",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "android": {
+    "allowMixedContent": true
+  }
+}

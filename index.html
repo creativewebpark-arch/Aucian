@@ -1,0 +1,2250 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+    <title>FOR AUCian</title>
+<link rel="shortcut icon" href="logo.png" type="image/x-icon">
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-analytics-compat.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            overflow: hidden;
+        }
+
+        /* ============ THEME SYSTEM ============ */
+        :root,
+        [data-theme="pink"] {
+            --primary: #ff2d78;
+            --primary-rgb: 255, 45, 120;
+            --primary-dark: #d81159;
+            --primary-light: #ffe0ec;
+            --primary-soft: #fff5f8;
+            --glow-1: rgba(255, 105, 180, 0.30);
+            --glow-2: rgba(255, 182, 213, 0.35);
+            --glow-3: rgba(255, 20, 147, 0.16);
+            --pattern-fill: %23ff6fa5;
+        }
+
+        [data-theme="green"] {
+            --primary: #2e8b57;
+            --primary-rgb: 46, 139, 87;
+            --primary-dark: #1f6b41;
+            --primary-light: #e2f5e9;
+            --primary-soft: #f3faf5;
+            --glow-1: rgba(46, 139, 87, 0.28);
+            --glow-2: rgba(144, 220, 160, 0.32);
+            --glow-3: rgba(20, 90, 55, 0.16);
+            --pattern-fill: %2343a047;
+        }
+
+        [data-theme="red"] {
+            --primary: #c81e2c;
+            --primary-rgb: 200, 30, 44;
+            --primary-dark: #96141f;
+            --primary-light: #fbe1e3;
+            --primary-soft: #fff4f4;
+            --glow-1: rgba(200, 30, 44, 0.28);
+            --glow-2: rgba(255, 110, 110, 0.30);
+            --glow-3: rgba(120, 10, 20, 0.18);
+            --pattern-fill: %23e53950;
+        }
+        /* ======================================= */
+
+        body {
+            background: #f0f2f5;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', 'Noto Sans Bengali', sans-serif;
+            display: flex;
+            flex-direction: column;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        /* Header */
+        .header {
+            background: #ffffff;
+            color: #1c1e21;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.15);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+        
+        .header-title {
+            font-size: clamp(1.3rem, 5vw, 1.6rem);
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--primary);
+            font-family: Georgia, 'Times New Roman', serif;
+            transition: color 0.3s ease;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .header-icon-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #f0f2f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            color: #050505;
+            cursor: pointer;
+            border: none;
+            transition: 0.2s;
+            position: relative;
+        }
+
+        .notif-dot {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            width: 10px;
+            height: 10px;
+            background: #f02849;
+            border-radius: 50%;
+            border: 2px solid white;
+        }
+
+        .header-icon-btn:active {
+            transform: scale(0.92);
+            background: #e4e6eb;
+        }
+
+        #themeSettingsBtn {
+            color: var(--primary);
+            transition: color 0.3s ease;
+        }
+
+        /* Main Content Wrapper */
+        .main-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            background-color: #f0f2f5;
+            background-image:
+                radial-gradient(circle at 15% 8%, var(--glow-1), transparent 40%),
+                radial-gradient(circle at 85% 20%, var(--glow-2), transparent 45%),
+                radial-gradient(circle at 50% 95%, var(--glow-3), transparent 50%),
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 14 C46 24 46 40 36 50 C26 40 26 24 36 14 Z' fill='PATTERNFILL' fill-opacity='0.07'/%3E%3C/svg%3E");
+            background-attachment: fixed, fixed, fixed, fixed;
+            background-repeat: no-repeat, no-repeat, no-repeat, repeat;
+            background-size: auto, auto, auto, 72px 72px;
+            transition: background-color 0.4s ease;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
+        }
+
+        /* Tab Content */
+        .tab-content {
+            display: none;
+            min-height: 100%;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Search Bar */
+        .search-bar-wrap {
+            padding: 10px 10px 0;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 14px;
+            border: none;
+            border-radius: 20px;
+            background: #e4e6eb;
+            font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+            outline: none;
+            font-family: inherit;
+        }
+
+        .search-input:focus {
+            background: white;
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.3);
+        }
+
+        /* Notification Tab */
+        .notif-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 14px;
+            padding-bottom: 20px;
+        }
+
+        .notif-section-title {
+            font-weight: 700;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: #1c1e21;
+            margin-bottom: 10px;
+        }
+
+        .top-post-card {
+            background: white;
+            border-radius: 10px;
+            border: 1px solid #dddfe2;
+            padding: 12px;
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+
+        .top-post-card .post-avatar {
+            width: 40px;
+            height: 40px;
+        }
+
+        .top-post-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .top-post-name {
+            font-weight: 700;
+            font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+        }
+
+        .top-post-message {
+            color: #444;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            margin: 4px 0;
+            word-break: break-word;
+        }
+
+        .top-post-stats {
+            color: #f0932b;
+            font-weight: 700;
+            font-size: clamp(0.75rem, 2.1vw, 0.85rem);
+        }
+
+        .notif-item {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: white;
+            border: 1px solid #e4e6eb;
+            border-radius: 10px;
+            padding: 10px 12px;
+            margin-bottom: 8px;
+        }
+
+        .notif-item .post-avatar {
+            width: 32px;
+            height: 32px;
+            font-size: 0.85rem;
+        }
+
+        .notif-item-body {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notif-item-name {
+            font-weight: 700;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+        }
+
+        .notif-item-text {
+            color: #65676b;
+            font-size: clamp(0.75rem, 2.1vw, 0.85rem);
+            margin-top: 2px;
+            word-break: break-word;
+        }
+
+        .notif-item-time {
+            color: #8a8d91;
+            font-size: 0.7rem;
+            margin-top: 3px;
+        }
+
+        .empty-msg {
+            text-align: center;
+            color: #65676b;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+        /* Home Tab - Feed */
+        .feed-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            padding-bottom: 20px;
+        }
+
+        /* Post Card */
+        .post-card {
+            background: white;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid #dddfe2;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px 8px;
+            flex-wrap: wrap;
+        }
+        
+        .post-avatar {
+            width: 36px;
+            height: 36px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 1rem;
+            text-transform: uppercase;
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+        
+        .post-user-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .post-user-name {
+            font-weight: 700;
+            color: #1c1e21;
+            font-size: clamp(0.85rem, 2.5vw, 0.95rem);
+            word-break: break-word;
+        }
+        
+        .post-student-id {
+            color: #65676b;
+            font-size: clamp(0.7rem, 2vw, 0.8rem);
+        }
+        
+        .post-time {
+            color: #65676b;
+            font-size: clamp(0.6rem, 1.8vw, 0.7rem);
+        }
+        
+        .post-message {
+            padding: 8px 12px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            color: #1c1e21;
+            line-height: 1.4;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+        
+        .post-photo-container {
+            width: 100%;
+            text-align: center;
+            background: #f0f2f5;
+        }
+        
+        .post-photo {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            display: block;
+        }
+
+        /* Reactions */
+        .engagement-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 12px;
+            font-size: clamp(0.75rem, 2.1vw, 0.85rem);
+            color: #65676b;
+        }
+
+        .reaction-summary {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 0;
+        }
+
+        .reaction-icons {
+            display: flex;
+            align-items: center;
+        }
+
+        .reaction-icons span {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: var(--primary-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            border: 1.5px solid white;
+            margin-left: -6px;
+            transition: background 0.3s ease;
+        }
+
+        .reaction-icons span:first-child {
+            margin-left: 0;
+        }
+
+        .reaction-total {
+            white-space: nowrap;
+        }
+
+        .meta-counts {
+            display: flex;
+            gap: 10px;
+            white-space: nowrap;
+        }
+
+        .action-row {
+            display: flex;
+            border-top: 1px solid #e4e6eb;
+            padding: 2px 4px;
+        }
+
+        .action-btn-wrapper {
+            position: relative;
+            flex: 1;
+            display: flex;
+        }
+
+        .action-btn {
+            flex: 1;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 8px 4px;
+            border-radius: 6px;
+            font-weight: 600;
+            color: #65676b;
+            font-size: clamp(0.8rem, 2.2vw, 0.9rem);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            transition: 0.15s;
+        }
+
+        .action-btn:hover {
+            background: #f0f2f5;
+        }
+
+        .action-btn:active {
+            transform: scale(0.96);
+        }
+
+        .action-btn.liked {
+            color: var(--primary);
+        }
+
+        .reaction-picker {
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: white;
+            border-radius: 30px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.2);
+            padding: 6px 8px;
+            display: none;
+            gap: 4px;
+            margin-bottom: 6px;
+            z-index: 20;
+            white-space: nowrap;
+        }
+
+        .reaction-picker.show {
+            display: flex;
+        }
+
+        .pick-emoji {
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: 0.15s;
+            display: inline-block;
+        }
+
+        .pick-emoji:hover {
+            transform: scale(1.35) translateY(-3px);
+        }
+
+        /* Comments */
+        .comments-section {
+            padding: 8px 12px;
+            background: #f7f8fa;
+            border-top: 1px solid #e4e6eb;
+            display: none;
+        }
+
+        .comments-section.show {
+            display: block;
+        }
+        
+        .comments-list {
+            max-height: 200px;
+            overflow-y: auto;
+            margin-bottom: 8px;
+        }
+        
+        .comment-item {
+            display: flex;
+            gap: 8px;
+            padding: 6px 0;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            align-items: flex-start;
+        }
+        
+        .comment-avatar {
+            width: 24px;
+            height: 24px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: 600;
+            flex-shrink: 0;
+            transition: background 0.3s ease;
+        }
+        
+        .comment-content {
+            flex: 1;
+            background: white;
+            padding: 6px 10px;
+            border-radius: 12px;
+        }
+        
+        .comment-author {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: clamp(0.75rem, 2.2vw, 0.85rem);
+            transition: color 0.3s ease;
+        }
+        
+        .comment-text {
+            color: #1c1e21;
+            margin-top: 2px;
+            word-break: break-word;
+        }
+        
+        .comment-input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+            margin-top: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .comment-name-input {
+            flex: 0 1 70px;
+            min-width: 60px;
+            padding: 8px;
+            border: 1px solid #ccd0d5;
+            border-radius: 20px;
+            font-size: clamp(0.75rem, 2.2vw, 0.85rem);
+            outline: none;
+        }
+        
+        .comment-input {
+            flex: 1;
+            min-width: 100px;
+            background: white;
+            border: 1px solid #ccd0d5;
+            border-radius: 20px;
+            padding: 8px 12px;
+            outline: none;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+        }
+        
+        .comment-send-btn {
+            background: var(--primary);
+            border: none;
+            border-radius: 20px;
+            padding: 8px 12px;
+            font-weight: 600;
+            cursor: pointer;
+            color: white;
+            transition: 0.2s;
+            font-size: clamp(0.75rem, 2.2vw, 0.85rem);
+            flex-shrink: 0;
+        }
+        
+        .comment-send-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Comment Suggestions */
+        .comment-suggestions {
+            display: flex;
+            gap: 4px;
+            flex-wrap: wrap;
+            margin-bottom: 8px;
+        }
+        
+        .suggestion-emoji {
+            font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 50%;
+            transition: 0.2s;
+        }
+        
+        .suggestion-emoji:hover {
+            background: #e4e6eb;
+            transform: scale(1.2);
+        }
+        
+        .suggestion-emoji:active {
+            transform: scale(0.9);
+        }
+
+        /* Create Post Tab */
+        .create-post-container {
+            max-width: 100%;
+            margin: 0 auto;
+            padding: 10px;
+            padding-bottom: 20px;
+        }
+        
+        .create-post-form {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 14px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: clamp(0.8rem, 2.3vw, 0.9rem);
+            font-weight: 600;
+            color: #65676b;
+            margin-bottom: 6px;
+        }
+        
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ccd0d5;
+            border-radius: 8px;
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+            outline: none;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus, .form-group textarea:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(var(--primary-rgb), 0.2);
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+            max-height: 200px;
+        }
+        
+        .photo-upload-btn {
+            background: var(--primary-light);
+            color: var(--primary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            display: inline-block;
+            font-weight: 600;
+            transition: 0.2s;
+            font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+            width: 100%;
+            text-align: center;
+        }
+        
+        .photo-upload-btn:active {
+            transform: scale(0.98);
+        }
+        
+        #photoInput {
+            display: none;
+        }
+        
+        #photoPreview {
+            width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+            display: none;
+            margin-top: 8px;
+        }
+        
+        .submit-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: clamp(0.9rem, 2.6vw, 1rem);
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            width: 100%;
+            transition: 0.2s;
+        }
+        
+        .submit-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Messenger Tab */
+        .messenger-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            min-height: 300px;
+            padding: 20px;
+        }
+        
+        .messenger-btn {
+            background: #0084ff;
+            color: white;
+            border: none;
+            font-weight: 600;
+            font-size: clamp(1rem, 3vw, 1.2rem);
+            padding: 16px 24px;
+            border-radius: 50px;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+            box-shadow: 0 4px 10px rgba(0,132,255,0.3);
+        }
+        
+        .messenger-btn:active {
+            transform: scale(0.95);
+        }
+
+        /* Bottom Navigation */
+        .bottom-nav {
+            background: white;
+            border-top: 1px solid #e4e6eb;
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding: 10px 5px;
+            flex-shrink: 0;
+            z-index: 10;
+            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
+            gap: 5px;
+            min-height: 60px;
+        }
+        
+        .nav-item {
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: clamp(1.2rem, 4vw, 1.5rem);
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: 0.2s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: #65676b;
+            flex: 1;
+            max-width: 120px;
+        }
+        
+        .nav-item.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+        
+        .nav-item:active {
+            color: red;
+            transform: scale(0.95);
+        }
+        
+        .nav-label {
+            font-size: clamp(0.6rem, 1.8vw, 0.7rem);
+            font-weight: 600;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: var(--primary);
+            font-size: clamp(0.9rem, 2.5vw, 1rem);
+        }
+
+        /* ============ LOADING SCREEN ============ */
+        #loadingScreen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 30%, var(--primary-soft), #ffffff 70%);
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+        }
+
+        #loadingScreen.hide {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+
+        .loading-logo-ring {
+            width: 148px;
+            height: 148px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            animation: logoPop 0.8s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        .loading-logo-ring::before {
+            content: '';
+            position: absolute;
+            inset: -8px;
+            border-radius: 50%;
+            border: 3px solid var(--primary-light);
+            border-top-color: var(--primary);
+            animation: spin 1.1s linear infinite;
+        }
+
+        .loading-logo-img {
+            width: 118px;
+            height: 118px;
+            border-radius: 50%;
+            object-fit: contain;
+            background: #fff;
+            box-shadow: 0 6px 22px rgba(var(--primary-rgb), 0.35);
+            animation: breathe 1.8s ease-in-out infinite;
+        }
+
+        @keyframes logoPop {
+            from { transform: scale(0.4); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .loading-title {
+            margin-top: 22px;
+            font-weight: 800;
+            font-size: clamp(1.05rem, 4vw, 1.3rem);
+            letter-spacing: 1.5px;
+            color: var(--primary);
+            font-family: Georgia, 'Times New Roman', serif;
+            opacity: 0;
+            animation: fadeUp 0.6s ease 0.5s forwards;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 6px;
+            margin-top: 16px;
+            opacity: 0;
+            animation: fadeUp 0.6s ease 0.7s forwards;
+        }
+
+        .loading-dots span {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: dotBounce 1.2s ease-in-out infinite;
+        }
+
+        .loading-dots span:nth-child(2) { animation-delay: 0.15s; }
+        .loading-dots span:nth-child(3) { animation-delay: 0.3s; }
+
+        @keyframes dotBounce {
+            0%, 80%, 100% { transform: translateY(0); opacity: 0.4; }
+            40% { transform: translateY(-8px); opacity: 1; }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* ========================================= */
+
+        /* ============ WELCOME NOTICE MODAL ============ */
+        .notice-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 9998;
+            align-items: center;
+            justify-content: center;
+            padding: 16px;
+        }
+
+        .notice-modal-overlay.show {
+            display: flex;
+        }
+
+        .notice-modal {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 18px;
+            padding: 24px 20px 20px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+            animation: noticePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+        }
+
+        @keyframes noticePop {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .notice-modal-logo {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .notice-modal-title {
+            font-size: clamp(1.05rem, 3.2vw, 1.2rem);
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 12px;
+        }
+
+        .notice-modal-text {
+            font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+            color: #333;
+            line-height: 1.7;
+            text-align: left;
+            background: var(--primary-soft);
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+
+        .notice-modal-btn {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: var(--primary);
+            color: white;
+            font-weight: 700;
+            font-size: clamp(0.9rem, 2.6vw, 1rem);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .notice-modal-btn:active {
+            transform: scale(0.97);
+        }
+        /* ================================================ */
+
+        /* ============ THEME PICKER MODAL ============ */
+        .theme-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 100;
+            align-items: flex-end;
+            justify-content: center;
+        }
+
+        .theme-modal-overlay.show {
+            display: flex;
+        }
+
+        .theme-modal {
+            background: white;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 18px 18px 0 0;
+            padding: 20px 18px 26px;
+            animation: slideUp 0.25s ease;
+            box-shadow: 0 -6px 24px rgba(0,0,0,0.2);
+        }
+
+        @media (min-width: 480px) {
+            .theme-modal-overlay {
+                align-items: center;
+            }
+            .theme-modal {
+                border-radius: 18px;
+            }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .theme-modal-title {
+            font-size: clamp(1rem, 3vw, 1.15rem);
+            font-weight: 800;
+            color: #1c1e21;
+            margin-bottom: 4px;
+        }
+
+        .theme-modal-subtitle {
+            font-size: clamp(0.78rem, 2.2vw, 0.85rem);
+            color: #65676b;
+            margin-bottom: 16px;
+        }
+
+        .theme-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .theme-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            width: 100%;
+            border: 2px solid #e4e6eb;
+            background: #fafafa;
+            border-radius: 14px;
+            padding: 12px 14px;
+            cursor: pointer;
+            text-align: left;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+
+        .theme-option:active {
+            transform: scale(0.98);
+        }
+
+        .theme-option.active {
+            border-color: var(--opt-color);
+            background: color-mix(in srgb, var(--opt-color) 8%, white);
+        }
+
+        .theme-swatch {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: linear-gradient(135deg, var(--opt-color), var(--opt-color-dark));
+            box-shadow: inset 0 0 0 3px rgba(255,255,255,0.6);
+            position: relative;
+        }
+
+        .theme-option[data-theme="pink"] { --opt-color: #ff2d78; --opt-color-dark: #d81159; }
+        .theme-option[data-theme="green"] { --opt-color: #2e8b57; --opt-color-dark: #1f6b41; }
+        .theme-option[data-theme="red"] { --opt-color: #c81e2c; --opt-color-dark: #96141f; }
+
+        .theme-option-text {
+            flex: 1;
+        }
+
+        .theme-option-name {
+            font-weight: 700;
+            font-size: clamp(0.88rem, 2.5vw, 0.98rem);
+            color: #1c1e21;
+        }
+
+        .theme-option-desc {
+            font-size: clamp(0.72rem, 2vw, 0.8rem);
+            color: #65676b;
+            margin-top: 1px;
+        }
+
+        .theme-option-check {
+            font-size: 1.1rem;
+            color: var(--opt-color);
+            opacity: 0;
+            transition: 0.2s;
+        }
+
+        .theme-option.active .theme-option-check {
+            opacity: 1;
+        }
+
+        .theme-modal-close {
+            margin-top: 16px;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 10px;
+            background: #f0f2f5;
+            color: #1c1e21;
+            font-weight: 600;
+            font-size: clamp(0.85rem, 2.4vw, 0.95rem);
+            cursor: pointer;
+        }
+
+        .theme-modal-close:active {
+            transform: scale(0.98);
+        }
+        /* ============================================= */
+
+        /* Desktop & Tablet */
+        @media (min-width: 768px) {
+            .feed-container,
+            .create-post-container {
+                max-width: 600px;
+                padding: 16px;
+                margin: 0 auto;
+            }
+            
+            .post-card {
+                margin-bottom: 16px;
+            }
+            
+            .comment-input-row {
+                flex-wrap: nowrap;
+            }
+            
+            .comment-name-input {
+                flex: 0 1 90px;
+            }
+            
+            .bottom-nav {
+                justify-content: center;
+                gap: 20px;
+            }
+            
+            .nav-item {
+                max-width: 150px;
+            }
+        }
+
+        /* Mobile Landscape */
+        @media (max-width: 480px) and (orientation: landscape) {
+            .post-photo {
+                max-height: 200px;
+            }
+            
+            .comment-input-row {
+                flex-wrap: nowrap;
+            }
+        }
+
+        /* ============ APP DOWNLOAD BANNER (shown on website, hidden inside the app) ============ */
+        #appDownloadBanner {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            background: linear-gradient(90deg, var(--primary), var(--primary-dark));
+            color: #fff;
+            padding: 8px 12px;
+            flex-shrink: 0;
+        }
+        #appDownloadBanner img { width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0; }
+        #appDownloadBanner .adb-text { flex: 1; font-size: 0.78rem; line-height: 1.25; }
+        #appDownloadBanner .adb-text b { font-size: 0.85rem; display: block; }
+        #appDownloadBanner .adb-btn {
+            background: #fff;
+            color: var(--primary-dark);
+            border: none;
+            padding: 8px 14px;
+            border-radius: 16px;
+            font-weight: 700;
+            font-size: 0.78rem;
+            white-space: nowrap;
+            cursor: pointer;
+        }
+        #appDownloadBanner .adb-close {
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-size: 1rem;
+            opacity: 0.8;
+            padding: 4px;
+            cursor: pointer;
+        }
+
+        /* ============ EDIT (own post/comment) ============ */
+        .edit-btn {
+            background: transparent;
+            border: none;
+            color: #65676b;
+            font-size: 0.78rem;
+            cursor: pointer;
+            margin-left: 6px;
+        }
+        .edit-btn:active { opacity: 0.6; }
+        .editable-textarea {
+            width: 100%;
+            font-family: inherit;
+            font-size: 0.9rem;
+            padding: 6px 8px;
+            border-radius: 8px;
+            border: 1px solid #ccd0d5;
+            margin-top: 4px;
+        }
+        .edit-save-row { display: flex; gap: 8px; margin-top: 6px; }
+        .edit-save-row button {
+            border: none;
+            border-radius: 14px;
+            padding: 5px 12px;
+            font-size: 0.78rem;
+            cursor: pointer;
+        }
+        .edit-save-btn { background: var(--primary); color: #fff; }
+        .edit-cancel-btn { background: #e4e6eb; color: #050505; }
+
+        /* ============ LINK PREVIEW CARD ============ */
+        .link-preview-card {
+            display: block;
+            border: 1px solid #dddfe2;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 8px 0;
+            text-decoration: none;
+            color: inherit;
+            background: #fafafa;
+        }
+        .link-preview-card img {
+            width: 100%;
+            max-height: 160px;
+            object-fit: cover;
+            display: block;
+            background: #eee;
+        }
+        .link-preview-body { padding: 8px 10px; }
+        .link-preview-domain { font-size: 0.7rem; color: #65676b; text-transform: uppercase; }
+        .link-preview-title { font-size: 0.85rem; font-weight: 700; margin: 2px 0; }
+        .link-preview-desc { font-size: 0.78rem; color: #65676b; }
+    </style>
+</head>
+<body>
+    <!-- App Download Banner (website only) -->
+    <div id="appDownloadBanner">
+        <img src="logo.png" alt="AUCian">
+        <div class="adb-text"><b>AUCian</b>নোটিফিকেশন ও আরও ভালো অভিজ্ঞতার জন্য App ডাউনলোড করুন</div>
+        <button class="adb-btn" id="adbDownloadBtn">Download</button>
+        <button class="adb-close" id="adbCloseBtn">✕</button>
+    </div>
+
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-logo-ring">
+            <img src="logo.png" alt="AUC Logo" class="loading-logo-img">
+        </div>
+        <div class="loading-title">FOR K.B STUDENTS</div>
+        <div class="loading-dots"><span></span><span></span><span></span></div>
+    </div>
+
+    <!-- First-visit Welcome Notice -->
+    <div class="notice-modal-overlay" id="noticeModalOverlay">
+        <div class="notice-modal">
+            <img src="logo.png" alt="AUC Logo" class="notice-modal-logo">
+            <div class="notice-modal-title">স্বাগতম! 🎉</div>
+            <div class="notice-modal-text">
+                এই সাইটটি সম্পূর্ণ মজা করার জন্য তৈরি করা হয়েছে। 🎓<br><br>
+                আমরা <b>Agricultural University College</b> এর স্টুডেন্ট। আমরা হলাম genius। 😎<br><br>
+                We can do everything. 🚀
+            </div>
+            <button class="notice-modal-btn" id="noticeCloseBtn">বুঝেছি 👍</button>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <div class="header">
+<img style="width: 5vh;height: 5vh;" src="logo.png">
+        <div class="header-title">AUCian</div>
+        <div class="header-icons">
+            <button class="header-icon-btn" id="themeSettingsBtn" title="থিম পরিবর্তন">
+                <i class="fa-solid fa-palette"></i>
+            </button>
+            <button class="header-icon-btn" id="headerNotifBtn" title="নোটিফিকেশন">
+              <i class="fa-solid fa-bell fa-shake"></i>
+              <span class="notif-dot" id="notifDot" style="display:none;"></span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Wrapper -->
+    <div class="main-wrapper">
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Home Tab -->
+            <div class="tab-content active" id="homeTab">
+                <div class="search-bar-wrap">
+                    <input type="text" id="searchInput" class="search-input" placeholder="🔍 নাম, স্টুডেন্ট আইডি বা বার্তা দিয়ে খুঁজুন...">
+                </div>
+                <div class="feed-container" id="feedContainer">
+                    <div class="loading">পোস্ট লোড হচ্ছে...</div>
+                </div>
+            </div>
+
+            <!-- Create Post Tab -->
+            <div class="tab-content" id="createTab">
+                <div class="create-post-container">
+                    <div class="create-post-form">
+                        <div class="form-group">
+                            <label>নাম</label>
+                            <input type="text" id="postName" placeholder="আপনার নাম" maxlength="40">
+                        </div>
+                        <div class="form-group">
+                            <label>স্টুডেন্ট আইডি</label>
+                            <input type="text" id="studentId" placeholder="স্টুডেন্ট আইডি" maxlength="20">
+                        </div>
+                        <div class="form-group">
+                            <label>বার্তা (সর্বোচ্চ ১৫০ অক্ষর)</label>
+                            <textarea id="postMessage" placeholder="আপনার বার্তা লিখুন..." maxlength="150"></textarea>
+                            <div style="text-align: right; font-size: 0.8rem; color: #65676b; margin-top: 4px;">
+                                <span id="charCount">0</span>/150
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="photo-upload-btn" for="photoInput">📷 ছবি যোগ করুন</label>
+                            <input type="file" id="photoInput" accept="image/*">
+                            <img id="photoPreview" src="#" alt="ছবির প্রিভিউ">
+                        </div>
+                        <button class="submit-btn" id="publishBtn">পোস্ট করুন</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notification Tab -->
+            <div class="tab-content" id="notifTab">
+                <div class="notif-container">
+                    <div class="notif-section-title">🔥 এই মুহূর্তে সবচেয়ে বেশি রিয়্যাক্ট পাওয়া পোস্ট</div>
+                    <div id="topPostBox"><div class="loading">লোড হচ্ছে...</div></div>
+
+                    <div class="notif-section-title" style="margin-top:18px;">🆕 সাম্প্রতিক পোস্ট</div>
+                    <div id="recentPostsList"><div class="loading">লোড হচ্ছে...</div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <button class="nav-item active" data-tab="homeTab">
+            <span><i class="fa-solid fa-house-chimney fa-bounce"></i></span>
+            <span class="nav-label">Home</span>
+        </button>
+        <button class="nav-item" data-tab="createTab">
+            <span><i class="fa-solid fa-pen-to-square fa-flip"></i></span>
+            <span class="nav-label">Post</span>
+        </button>
+        <button class="nav-item" data-tab="notifTab">
+            <span><i class="fa-solid fa-bell fa-shake"></i></span>
+            <span class="nav-label">Notification</span>
+        </button>
+        <button class="nav-item" id="messengerNavBtn" data-external="https://friendship.free.nf">
+            <span><i class="fa-brands fa-signal-messenger fa-beat"></i></span>
+            <span class="nav-label">Messenger</span>
+        </button>
+    </div>
+
+    <!-- Theme Picker Modal -->
+    <div class="theme-modal-overlay" id="themeModalOverlay">
+        <div class="theme-modal">
+            <div class="theme-modal-title">🎨 থিম বাছাই করুন</div>
+            <div class="theme-modal-subtitle">আপনার পছন্দ মতো রঙ বেছে নিন</div>
+            <div class="theme-options">
+                <button class="theme-option" data-theme="pink">
+                    <div class="theme-swatch"></div>
+                    <div class="theme-option-text">
+                        <div class="theme-option-name">গোলাপি থিম</div>
+                        <div class="theme-option-desc">ভালোবাসা (Love)</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check theme-option-check"></i>
+                </button>
+                <button class="theme-option" data-theme="green">
+                    <div class="theme-swatch"></div>
+                    <div class="theme-option-text">
+                        <div class="theme-option-name">সবুজ থিম</div>
+                        <div class="theme-option-desc">প্রকৃতি (Nature)</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check theme-option-check"></i>
+                </button>
+                <button class="theme-option" data-theme="red">
+                    <div class="theme-swatch"></div>
+                    <div class="theme-option-text">
+                        <div class="theme-option-name">লাল থিম</div>
+                        <div class="theme-option-desc">রক্ত (Blood)</div>
+                    </div>
+                    <i class="fa-solid fa-circle-check theme-option-check"></i>
+                </button>
+            </div>
+            <button class="theme-modal-close" id="themeModalClose">বন্ধ করুন</button>
+        </div>
+    </div>
+
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBj3SygHN1ZDqZQXjUKH78SzYmL96MTHvA",
+            authDomain: "somabesh.firebaseapp.com",
+            projectId: "somabesh",
+            storageBucket: "somabesh.firebasestorage.app",
+            messagingSenderId: "174820443321",
+            appId: "1:174820443321:web:3f41934df628629aef4768",
+            measurementId: "G-N2YGVB5BLN"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const analytics = firebase.analytics();
+        const postsCol = db.collection("posts");
+
+        // ============ APP CONFIG (fill these in after you deploy) ============
+        // 1) After GitHub Actions builds your APK and you create a GitHub Release,
+        //    paste the .apk asset URL here so the website "Download" banner works.
+        const APK_DOWNLOAD_URL = "https://github.com/YOUR_USERNAME/YOUR_REPO/releases/latest/download/aucian.apk";
+        // 2) After you deploy the /vercel-functions folder to Vercel, paste your
+        //    Vercel project URL here (no trailing slash), e.g. https://aucian-api.vercel.app
+        const API_BASE_URL = "https://YOUR-VERCEL-PROJECT.vercel.app";
+        // FCM topic every device subscribes to, so one push reaches everyone
+        const FCM_TOPIC = "all_aucian_users";
+
+        // ============ DEVICE ID (used so only the device that posted/commented can edit) ============
+        function getDeviceId() {
+            let id = localStorage.getItem('aucian_device_id');
+            if (!id) {
+                id = 'dev_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 12);
+                localStorage.setItem('aucian_device_id', id);
+            }
+            return id;
+        }
+        const MY_DEVICE_ID = getDeviceId();
+
+        // ============ WEBSITE APP-DOWNLOAD BANNER (hidden automatically inside the app) ============
+        function isRunningInsideApp() {
+            // Capacitor injects window.Capacitor only inside the native app WebView
+            return !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+        }
+        (function initDownloadBanner() {
+            if (isRunningInsideApp()) return; // never show inside the app itself
+            if (localStorage.getItem('aucian_hide_banner') === 'yes') return;
+            const banner = document.getElementById('appDownloadBanner');
+            if (!banner) return;
+            banner.style.display = 'flex';
+            document.getElementById('adbDownloadBtn').addEventListener('click', () => {
+                window.location.href = APK_DOWNLOAD_URL;
+            });
+            document.getElementById('adbCloseBtn').addEventListener('click', () => {
+                banner.style.display = 'none';
+                localStorage.setItem('aucian_hide_banner', 'yes');
+            });
+        })();
+
+        // ============ LINK PREVIEW ============
+        // Finds the first URL in a text message
+        function extractFirstUrl(text) {
+            if (!text) return null;
+            const match = text.match(/(https?:\/\/[^\s]+)/i);
+            return match ? match[0] : null;
+        }
+        // Simple client-side cache so we don't call the API twice for the same link
+        const linkPreviewCache = {};
+        async function fetchLinkPreview(url, containerEl) {
+            if (linkPreviewCache[url]) {
+                renderLinkPreview(linkPreviewCache[url], url, containerEl);
+                return;
+            }
+            try {
+                const res = await fetch(`${API_BASE_URL}/api/link-preview?url=${encodeURIComponent(url)}`);
+                if (!res.ok) return;
+                const data = await res.json();
+                linkPreviewCache[url] = data;
+                renderLinkPreview(data, url, containerEl);
+            } catch (e) {
+                console.error('Link preview fetch failed:', e);
+            }
+        }
+        function renderLinkPreview(data, url, containerEl) {
+            if (!containerEl || !data) return;
+            const domain = (() => { try { return new URL(url).hostname; } catch (e) { return url; } })();
+            containerEl.innerHTML = `
+                <a class="link-preview-card" href="${url}" target="_blank" rel="noopener">
+                    ${data.image ? `<img src="${data.image}" alt="">` : ''}
+                    <div class="link-preview-body">
+                        <div class="link-preview-domain">${domain}</div>
+                        <div class="link-preview-title">${data.title || url}</div>
+                        ${data.description ? `<div class="link-preview-desc">${data.description}</div>` : ''}
+                    </div>
+                </a>
+            `;
+        }
+
+        // ============ PUSH NOTIFICATIONS (native app only, via Firebase Cloud Messaging) ============
+        async function initPushNotifications() {
+            if (!isRunningInsideApp()) return; // only runs inside the Capacitor app
+            try {
+                const { PushNotifications } = window.Capacitor.Plugins;
+                if (!PushNotifications) return;
+                const perm = await PushNotifications.requestPermissions();
+                if (perm.receive !== 'granted') return;
+                await PushNotifications.register();
+                // Subscribe this device to the shared topic so it gets every broadcast
+                PushNotifications.addListener('registration', async () => {
+                    try { await PushNotifications.subscribeToTopic({ topic: FCM_TOPIC }); } catch (e) {}
+                });
+                PushNotifications.addListener('registrationError', (err) => {
+                    console.error('Push registration error:', err);
+                });
+            } catch (e) {
+                console.error('Push notification init failed:', e);
+            }
+        }
+        // Ask the Vercel function to broadcast a push notification to everyone
+        async function broadcastNotification(title, body) {
+            try {
+                await fetch(`${API_BASE_URL}/api/notify`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, body, topic: FCM_TOPIC })
+                });
+            } catch (e) {
+                console.error('Broadcast notification failed:', e);
+            }
+        }
+
+        // ============ LOADING SCREEN + FIRST-VISIT NOTICE ============
+        const FIRST_VISIT_KEY = 'kbclz_visited_before';
+
+        function hideLoadingScreen() {
+            const loader = document.getElementById('loadingScreen');
+            if (!loader) return;
+            loader.classList.add('hide');
+            setTimeout(() => {
+                loader.style.display = 'none';
+                maybeShowFirstVisitNotice();
+            }, 650);
+        }
+
+        function maybeShowFirstVisitNotice() {
+            const hasVisited = localStorage.getItem(FIRST_VISIT_KEY);
+            if (!hasVisited) {
+                document.getElementById('noticeModalOverlay').classList.add('show');
+                localStorage.setItem(FIRST_VISIT_KEY, 'yes');
+            }
+        }
+
+        document.getElementById('noticeCloseBtn').addEventListener('click', () => {
+            document.getElementById('noticeModalOverlay').classList.remove('show');
+        });
+        // ================================================================
+
+        // ============ THEME SWITCHER ============
+        const THEME_KEY = 'kbclz_theme';
+        const themePatternFills = {
+            pink: '%23ff6fa5',
+            green: '%2343a047',
+            red: '%23e53950'
+        };
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+
+            // Swap the tiled decorative pattern's fill color to match the theme
+            const mainContent = document.querySelector('.main-content');
+            if (mainContent) {
+                const fill = themePatternFills[theme] || themePatternFills.pink;
+                mainContent.style.backgroundImage = `radial-gradient(circle at 15% 8%, var(--glow-1), transparent 40%), radial-gradient(circle at 85% 20%, var(--glow-2), transparent 45%), radial-gradient(circle at 50% 95%, var(--glow-3), transparent 50%), url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='72' height='72'%3E%3Cpath d='M36 14 C46 24 46 40 36 50 C26 40 26 24 36 14 Z' fill='${fill}' fill-opacity='0.07'/%3E%3C/svg%3E")`;
+            }
+
+            document.querySelectorAll('.theme-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.theme === theme);
+            });
+
+            localStorage.setItem(THEME_KEY, theme);
+        }
+
+        function openThemeModal() {
+            document.getElementById('themeModalOverlay').classList.add('show');
+        }
+
+        function closeThemeModal() {
+            document.getElementById('themeModalOverlay').classList.remove('show');
+        }
+
+        document.getElementById('themeSettingsBtn').addEventListener('click', openThemeModal);
+        document.getElementById('themeModalClose').addEventListener('click', closeThemeModal);
+        document.getElementById('themeModalOverlay').addEventListener('click', (e) => {
+            if (e.target.id === 'themeModalOverlay') closeThemeModal();
+        });
+
+        document.querySelectorAll('.theme-option').forEach(btn => {
+            btn.addEventListener('click', () => {
+                applyTheme(btn.dataset.theme);
+                setTimeout(closeThemeModal, 200);
+            });
+        });
+        // ========================================
+
+        // Tab navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const tabContents = document.querySelectorAll('.tab-content');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                // Messenger button opens the external link directly, without switching tabs
+                if (item.dataset.external) {
+                    window.open(item.dataset.external, '_blank');
+                    return;
+                }
+
+                const tabId = item.dataset.tab;
+
+                navItems.forEach(nav => nav.classList.remove('active'));
+                tabContents.forEach(content => content.classList.remove('active'));
+
+                item.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+
+                if (tabId === 'notifTab') {
+                    notifiedCount = latestPostsData.length;
+                    localStorage.setItem('lastSeenPostCount', String(notifiedCount));
+                    const dot = document.getElementById('notifDot');
+                    if (dot) dot.style.display = 'none';
+                }
+            });
+        });
+
+        document.getElementById('headerNotifBtn').addEventListener('click', () => {
+            document.querySelector('[data-tab="notifTab"]').click();
+        });
+
+        // Character counter
+        document.getElementById('postMessage').addEventListener('input', function() {
+            const count = this.value.length;
+            document.getElementById('charCount').textContent = count;
+            if (count > 150) {
+                this.value = this.value.slice(0, 150);
+                document.getElementById('charCount').textContent = 150;
+            }
+        });
+
+        // Photo preview
+        const photoInput = document.getElementById('photoInput');
+        const photoPreview = document.getElementById('photoPreview');
+        
+        photoInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    photoPreview.src = ev.target.result;
+                    photoPreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                photoPreview.style.display = 'none';
+            }
+        });
+
+        // Format count like Facebook (1.5K, 12K, 3.2M)
+        function formatCount(n) {
+            n = n || 0;
+            if (n < 1000) return String(n);
+            if (n < 1000000) return (n / 1000).toFixed(n % 1000 >= 100 ? 1 : 0).replace(/\.0$/, '') + 'K';
+            return (n / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+        }
+
+        const reactionEmoji = { like: '👍', love: '❤️', haha: '😆', sad: '😓' };
+
+        // Track which posts this device has already reacted to (one reaction per device per post)
+        function getMyReactions() {
+            try {
+                return JSON.parse(localStorage.getItem('myReactions') || '{}');
+            } catch (e) {
+                return {};
+            }
+        }
+
+        function saveMyReaction(postId, reactionType) {
+            const mine = getMyReactions();
+            mine[postId] = reactionType;
+            localStorage.setItem('myReactions', JSON.stringify(mine));
+        }
+
+        // Format time
+        function formatTime(timestamp) {
+            if (!timestamp) return "এখন";
+            const date = timestamp?.toDate ? timestamp.toDate() : new Date(timestamp);
+            return date.toLocaleString('bn-BD', { 
+                day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' 
+            });
+        }
+
+        // Publish post
+        async function publishPost() {
+            const name = document.getElementById('postName').value.trim();
+            const studentId = document.getElementById('studentId').value.trim();
+            const message = document.getElementById('postMessage').value.trim();
+            const photoFile = photoInput.files[0];
+            
+            if (!name) {
+                alert('নাম লিখুন');
+                return;
+            }
+            if (!studentId) {
+                alert('স্টুডেন্ট আইডি লিখুন');
+                return;
+            }
+            if (!message) {
+                alert('বার্তা লিখুন');
+                return;
+            }
+
+            const publishBtn = document.getElementById('publishBtn');
+            publishBtn.disabled = true;
+            publishBtn.textContent = 'পোস্ট হচ্ছে...';
+
+            try {
+                let photoBase64 = null;
+                if (photoFile) {
+                    const reader = new FileReader();
+                    photoBase64 = await new Promise((resolve, reject) => {
+                        reader.onload = () => resolve(reader.result);
+                        reader.onerror = reject;
+                        reader.readAsDataURL(photoFile);
+                    });
+                }
+
+                await postsCol.add({
+                    name: name,
+                    studentId: studentId,
+                    message: message,
+                    photo: photoBase64 || null,
+                    deviceId: MY_DEVICE_ID,
+                    reactions: {
+                        like: 0,
+                        love: 0,
+                        haha: 0,
+                        sad: 0
+                    },
+                    comments: [],
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+
+                // Let everyone's app know a new post is up
+                broadcastNotification('নতুন পোস্ট', `${name}: ${message.slice(0, 80)}`);
+
+                // Reset form
+                document.getElementById('postName').value = '';
+                document.getElementById('studentId').value = '';
+                document.getElementById('postMessage').value = '';
+                photoInput.value = '';
+                photoPreview.style.display = 'none';
+                document.getElementById('charCount').textContent = '0';
+                
+                // Switch to home tab
+                document.querySelector('[data-tab="homeTab"]').click();
+                
+            } catch (error) {
+                console.error('Error adding post:', error);
+                alert('পোস্ট যোগ করা যায়নি');
+            } finally {
+                publishBtn.disabled = false;
+                publishBtn.textContent = 'পোস্ট করুন';
+            }
+        }
+
+        document.getElementById('publishBtn').addEventListener('click', publishPost);
+
+        // Comment suggestions
+        const commentSuggestions = ['🥴', '❤️', '😭', '🥱', '🙈', '🙊', '💋', '💞'];
+
+        // Global state: latest posts (newest first), search query, notification tracking
+        let latestPostsData = [];
+        let searchQuery = '';
+        let notifiedCount = parseInt(localStorage.getItem('lastSeenPostCount') || '0', 10);
+
+        // Turn a Firestore snapshot into a sorted (newest-first) plain array
+        function buildPostsArray(snapshot) {
+            const posts = [];
+            snapshot.forEach((doc) => {
+                const data = doc.data();
+                posts.push({
+                    id: doc.id,
+                    ...data,
+                    time: data.createdAt ? formatTime(data.createdAt) : 'সময় নেই',
+                    _createdAtMillis: (data.createdAt && data.createdAt.toMillis) ? data.createdAt.toMillis() : 0
+                });
+            });
+            posts.sort((a, b) => b._createdAtMillis - a._createdAtMillis);
+            return posts;
+        }
+
+        // Render posts
+        function renderPosts(allPosts) {
+            const feed = document.getElementById('feedContainer');
+            if (!feed) return;
+
+            // Apply search filter (name, student ID, or message)
+            const q = searchQuery.trim().toLowerCase();
+            let posts = allPosts;
+            if (q) {
+                posts = allPosts.filter(post => {
+                    const name = (post.name || '').toLowerCase();
+                    const sid = (post.studentId || '').toLowerCase();
+                    const msg = (post.message || '').toLowerCase();
+                    return name.includes(q) || sid.includes(q) || msg.includes(q);
+                });
+            } else {
+                // Random shuffle only when not searching, so search results stay stable/relevant
+                posts = [...allPosts].sort(() => Math.random() - 0.5);
+            }
+
+            if (posts.length === 0) {
+                feed.innerHTML = q
+                    ? '<div class="loading">এই খোঁজের সাথে মিলে এমন কোনো পোস্ট নেই</div>'
+                    : '<div class="loading">কোনো পোস্ট নেই</div>';
+                return;
+            }
+
+            let html = '';
+            posts.forEach(post => {
+                const avatarLetter = post.name ? post.name.charAt(0).toUpperCase() : '?';
+                const photoHtml = post.photo ? `<div class="post-photo-container"><img src="${post.photo}" class="post-photo" alt="পোস্ট ছবি"></div>` : '';
+                const reactions = post.reactions || { like: 0, love: 0, haha: 0, sad: 0 };
+                
+                let commentsHtml = '';
+                if (post.comments && Array.isArray(post.comments)) {
+                    post.comments.forEach(comment => {
+                        const canEditComment = comment.deviceId && comment.deviceId === MY_DEVICE_ID && comment.commentId;
+                        commentsHtml += `
+                            <div class="comment-item">
+                                <div class="comment-avatar">${comment.author ? comment.author.charAt(0).toUpperCase() : '?'}</div>
+                                <div class="comment-content">
+                                    <div class="comment-author">${comment.author}${canEditComment ? `<button class="edit-btn comment-edit-btn" data-post-id="${post.id}" data-comment-id="${comment.commentId}">✎ Edit</button>` : ''}</div>
+                                    <div class="comment-text" id="commentText-${post.id}-${comment.commentId || ''}">${comment.text}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                // Comment suggestions HTML
+                let suggestionsHtml = '';
+                commentSuggestions.forEach(emoji => {
+                    suggestionsHtml += `<span class="suggestion-emoji" data-emoji="${emoji}">${emoji}</span>`;
+                });
+
+                // Build top reaction icons (up to 3 most-used, by fixed priority order)
+                const order = ['like', 'love', 'haha', 'sad'];
+                const usedReactions = order.filter(k => (reactions[k] || 0) > 0).sort((a, b) => (reactions[b] || 0) - (reactions[a] || 0)).slice(0, 3);
+                const totalReactions = order.reduce((sum, k) => sum + (reactions[k] || 0), 0);
+                const iconsHtml = usedReactions.length
+                    ? usedReactions.map(k => `<span>${reactionEmoji[k]}</span>`).join('')
+                    : '<span>👍</span>';
+                const commentCount = (post.comments && Array.isArray(post.comments)) ? post.comments.length : 0;
+
+                const myReactions = getMyReactions();
+                const myReactionForThisPost = myReactions[post.id];
+                const likeBtnLabel = myReactionForThisPost
+                    ? `${reactionEmoji[myReactionForThisPost]} ${myReactionForThisPost === 'like' ? 'লাইক' : 'রিয়্যাক্ট'} করেছেন`
+                    : '👍 লাইক';
+                const canEditPost = post.deviceId && post.deviceId === MY_DEVICE_ID;
+                const postUrl = extractFirstUrl(post.message);
+
+                html += `
+                    <div class="post-card" data-post-id="${post.id}">
+                        <div class="post-header">
+                            <div class="post-avatar">${avatarLetter}</div>
+                            <div class="post-user-info">
+                                <div class="post-user-name">${post.name || 'নামহীন'}</div>
+                                <div class="post-student-id">${post.studentId || ''}</div>
+                                <div class="post-time">${post.time}</div>
+                            </div>
+                            ${canEditPost ? `<button class="edit-btn post-edit-btn" data-post-id="${post.id}">✎ Edit</button>` : ''}
+                        </div>
+                        <div class="post-message" id="postMsg-${post.id}">${post.message}</div>
+                        <div id="linkPrev-${post.id}"></div>
+                        ${photoHtml}
+
+                        <div class="engagement-bar">
+                            <div class="reaction-summary">
+                                <div class="reaction-icons">${iconsHtml}</div>
+                                <span class="reaction-total">${totalReactions > 0 ? formatCount(totalReactions) : ''}</span>
+                            </div>
+                            <div class="meta-counts">
+                                ${commentCount > 0 ? `<span data-comment-count="${post.id}">${formatCount(commentCount)} মন্তব্য</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="action-row">
+                            <div class="action-btn-wrapper">
+                                <button class="action-btn like-btn${myReactionForThisPost ? ' liked' : ''}" data-reaction="like" data-post-id="${post.id}"${myReactionForThisPost ? ' disabled' : ''}>${likeBtnLabel}</button>
+                                <div class="reaction-picker" data-picker-for="${post.id}">
+                                    <span class="pick-emoji" data-reaction="like" data-post-id="${post.id}">👍</span>
+                                    <span class="pick-emoji" data-reaction="love" data-post-id="${post.id}">❤️</span>
+                                    <span class="pick-emoji" data-reaction="haha" data-post-id="${post.id}">😆</span>
+                                    <span class="pick-emoji" data-reaction="sad" data-post-id="${post.id}">😓</span>
+                                </div>
+                            </div>
+                            <button class="action-btn comment-toggle-btn" data-post-id="${post.id}">💬 মন্তব্য</button>
+                        </div>
+
+                        <div class="comments-section" data-comments-for="${post.id}">
+                            <div class="comment-suggestions">
+                                ${suggestionsHtml}
+                            </div>
+                            <div class="comments-list">
+                                ${commentsHtml || '<div style="color:#888; font-size:0.85rem;">কোনো মন্তব্য নেই, প্রথম মন্তব্য করুন</div>'}
+                            </div>
+                            <div class="comment-input-row">
+                                <input type="text" class="comment-name-input" placeholder="নাম">
+                                <input type="text" class="comment-input" placeholder="মন্তব্য লিখুন..." data-comment-input="${post.id}">
+                                <button class="comment-send-btn" data-post-id="${post.id}">পাঠান</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            feed.innerHTML = html;
+
+            // Fetch link previews for any post whose message contains a URL
+            posts.forEach(post => {
+                const url = extractFirstUrl(post.message);
+                if (url) {
+                    const container = document.getElementById(`linkPrev-${post.id}`);
+                    fetchLinkPreview(url, container);
+                }
+            });
+
+            // Edit a post's own message (only the device that created it sees this button)
+            feed.querySelectorAll('.post-edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const postId = btn.dataset.postId;
+                    const msgEl = document.getElementById(`postMsg-${postId}`);
+                    if (!msgEl || msgEl.querySelector('textarea')) return;
+                    const currentText = msgEl.textContent;
+                    msgEl.innerHTML = `
+                        <textarea class="editable-textarea" maxlength="150">${currentText}</textarea>
+                        <div class="edit-save-row">
+                            <button class="edit-save-btn">সংরক্ষণ</button>
+                            <button class="edit-cancel-btn">বাতিল</button>
+                        </div>
+                    `;
+                    const textarea = msgEl.querySelector('textarea');
+                    textarea.focus();
+                    msgEl.querySelector('.edit-cancel-btn').addEventListener('click', () => {
+                        msgEl.textContent = currentText;
+                    });
+                    msgEl.querySelector('.edit-save-btn').addEventListener('click', async () => {
+                        const newText = textarea.value.trim();
+                        if (!newText) { alert('বার্তা খালি রাখা যাবে না'); return; }
+                        try {
+                            await postsCol.doc(postId).update({ message: newText });
+                        } catch (err) {
+                            console.error('Error editing post:', err);
+                            alert('এডিট করা যায়নি');
+                        }
+                    });
+                });
+            });
+
+            // Edit a comment's own text (only the device that created it sees this button)
+            feed.querySelectorAll('.comment-edit-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const postId = btn.dataset.postId;
+                    const commentId = btn.dataset.commentId;
+                    const textEl = document.getElementById(`commentText-${postId}-${commentId}`);
+                    if (!textEl || textEl.querySelector('textarea')) return;
+                    const currentText = textEl.textContent;
+                    textEl.innerHTML = `
+                        <textarea class="editable-textarea" rows="2"></textarea>
+                        <div class="edit-save-row">
+                            <button class="edit-save-btn">সংরক্ষণ</button>
+                            <button class="edit-cancel-btn">বাতিল</button>
+                        </div>
+                    `;
+                    const textarea = textEl.querySelector('textarea');
+                    textarea.value = currentText;
+                    textarea.focus();
+                    textEl.querySelector('.edit-cancel-btn').addEventListener('click', () => {
+                        textEl.textContent = currentText;
+                    });
+                    textEl.querySelector('.edit-save-btn').addEventListener('click', async () => {
+                        const newText = textarea.value.trim();
+                        if (!newText) { alert('মন্তব্য খালি রাখা যাবে না'); return; }
+                        try {
+                            const postRef = postsCol.doc(postId);
+                            const doc = await postRef.get();
+                            if (!doc.exists) return;
+                            const comments = doc.data().comments || [];
+                            const updated = comments.map(c => c.commentId === commentId ? { ...c, text: newText } : c);
+                            await postRef.update({ comments: updated });
+                        } catch (err) {
+                            console.error('Error editing comment:', err);
+                            alert('এডিট করা যায়নি');
+                        }
+                    });
+                });
+            });
+
+            // Send a reaction to Firestore (one reaction per device per post)
+            async function sendReaction(postId, reactionType) {
+                const mine = getMyReactions();
+                if (mine[postId]) {
+                    alert('আপনি ইতিমধ্যে এই পোস্টে রিয়্যাক্ট করেছেন');
+                    return;
+                }
+                try {
+                    const postRef = db.collection("posts").doc(postId);
+                    await postRef.update({
+                        [`reactions.${reactionType}`]: firebase.firestore.FieldValue.increment(1)
+                    });
+                    saveMyReaction(postId, reactionType);
+                } catch (err) {
+                    console.error('Error updating reaction:', err);
+                }
+            }
+
+            // Quick "লাইক" tap
+            feed.querySelectorAll('.like-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    if (btn.disabled) return;
+                    btn.classList.add('liked');
+                    btn.disabled = true;
+                    sendReaction(btn.dataset.postId, 'like');
+                });
+            });
+
+            // Long-press / hover on the Like button opens the reaction picker
+            feed.querySelectorAll('.action-btn-wrapper').forEach(wrapper => {
+                const picker = wrapper.querySelector('.reaction-picker');
+                const likeBtn = wrapper.querySelector('.like-btn');
+                let pressTimer = null;
+
+                const openPicker = () => { if (!likeBtn.disabled) picker.classList.add('show'); };
+                const closePicker = () => picker.classList.remove('show');
+
+                wrapper.addEventListener('mouseenter', () => { pressTimer = setTimeout(openPicker, 350); });
+                wrapper.addEventListener('mouseleave', () => { clearTimeout(pressTimer); closePicker(); });
+                wrapper.addEventListener('touchstart', (e) => { pressTimer = setTimeout(openPicker, 350); }, { passive: true });
+                wrapper.addEventListener('touchend', () => { clearTimeout(pressTimer); });
+
+                picker.querySelectorAll('.pick-emoji').forEach(pick => {
+                    pick.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        sendReaction(pick.dataset.postId, pick.dataset.reaction);
+                        closePicker();
+                    });
+                });
+            });
+
+            // Toggle comments visibility
+            feed.querySelectorAll('.comment-toggle-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const postId = btn.dataset.postId;
+                    const section = feed.querySelector(`.comments-section[data-comments-for="${postId}"]`);
+                    if (!section) return;
+                    section.classList.toggle('show');
+                    if (section.classList.contains('show')) {
+                        const input = section.querySelector('.comment-input');
+                        if (input) input.focus();
+                    }
+                });
+            });
+
+
+            // Comment suggestion handlers
+            feed.querySelectorAll('.suggestion-emoji').forEach(emoji => {
+                emoji.addEventListener('click', (e) => {
+                    const postCard = e.target.closest('.post-card');
+                    const commentInput = postCard.querySelector('.comment-input');
+                    commentInput.value += emoji.dataset.emoji;
+                    commentInput.focus();
+                });
+            });
+
+            // Comment send handlers
+            feed.querySelectorAll('.comment-send-btn').forEach(btn => {
+                btn.addEventListener('click', async () => {
+                    const postId = btn.dataset.postId;
+                    const postCard = btn.closest('.post-card');
+                    const input = postCard.querySelector('.comment-input');
+                    const nameInput = postCard.querySelector('.comment-name-input');
+                    
+                    if (!input || !nameInput) return;
+                    
+                    const commentText = input.value.trim();
+                    const commenterName = nameInput.value.trim() || 'অতিথি';
+                    
+                    if (!commentText) {
+                        alert('মন্তব্য লিখুন');
+                        return;
+                    }
+                    
+                    try {
+                        const postRef = db.collection("posts").doc(postId);
+                        const doc = await postRef.get();
+                        if (doc.exists) {
+                            const existingComments = doc.data().comments || [];
+                            const newComments = [...existingComments, { 
+                                author: commenterName, 
+                                text: commentText,
+                                deviceId: MY_DEVICE_ID,
+                                commentId: 'c_' + Date.now().toString(36) + '_' + Math.random().toString(36).slice(2, 8)
+                            }];
+                            await postRef.update({ comments: newComments });
+                            broadcastNotification('নতুন মন্তব্য', `${commenterName}: ${commentText.slice(0, 80)}`);
+                        }
+                        input.value = '';
+                    } catch (err) {
+                        console.error('Error adding comment:', err);
+                        alert('মন্তব্য যোগ করা যায়নি');
+                    }
+                });
+            });
+        }
+
+        // Build the Notification tab: top reacted post + recent posts list
+        function renderNotifications(posts) {
+            const topBox = document.getElementById('topPostBox');
+            const recentBox = document.getElementById('recentPostsList');
+            if (!topBox || !recentBox) return;
+
+            if (posts.length === 0) {
+                topBox.innerHTML = '<div class="empty-msg">এখনো কোনো পোস্ট নেই</div>';
+                recentBox.innerHTML = '<div class="empty-msg">এখনো কোনো পোস্ট নেই</div>';
+                return;
+            }
+
+            // Top reacted post
+            const order = ['like', 'love', 'haha', 'sad'];
+            let topPost = null;
+            let topTotal = -1;
+            posts.forEach(post => {
+                const r = post.reactions || {};
+                const total = order.reduce((sum, k) => sum + (r[k] || 0), 0);
+                if (total > topTotal) {
+                    topTotal = total;
+                    topPost = post;
+                }
+            });
+
+            if (topPost && topTotal > 0) {
+                const avatarLetter = topPost.name ? topPost.name.charAt(0).toUpperCase() : '?';
+                topBox.innerHTML = `
+                    <div class="top-post-card">
+                        <div class="post-avatar">${avatarLetter}</div>
+                        <div class="top-post-info">
+                            <div class="top-post-name">${topPost.name || 'নামহীন'}</div>
+                            <div class="top-post-message">${(topPost.message || '').slice(0, 80)}</div>
+                            <div class="top-post-stats">🔥 ${formatCount(topTotal)} রিয়্যাক্ট</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                topBox.innerHTML = '<div class="empty-msg">এখনো কোনো পোস্টে রিয়্যাক্ট আসেনি</div>';
+            }
+
+            // Recent posts (already newest-first)
+            const recent = posts.slice(0, 10);
+            recentBox.innerHTML = recent.map(post => {
+                const avatarLetter = post.name ? post.name.charAt(0).toUpperCase() : '?';
+                const preview = (post.message || '').slice(0, 60);
+                return `
+                    <div class="notif-item">
+                        <div class="post-avatar">${avatarLetter}</div>
+                        <div class="notif-item-body">
+                            <div class="notif-item-name">${post.name || 'নামহীন'} নতুন পোস্ট করেছেন</div>
+                            <div class="notif-item-text">${preview}</div>
+                            <div class="notif-item-time">${post.time}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Search input: re-filter the feed as the user types
+        document.getElementById('searchInput').addEventListener('input', function() {
+            searchQuery = this.value;
+            renderPosts(latestPostsData);
+        });
+
+        // Listen to real-time updates
+        function startListening() {
+            postsCol.onSnapshot((snapshot) => {
+                latestPostsData = buildPostsArray(snapshot);
+                renderPosts(latestPostsData);
+                renderNotifications(latestPostsData);
+
+                // Show a notification dot if new posts arrived since we last checked the tab
+                if (latestPostsData.length > notifiedCount) {
+                    const dot = document.getElementById('notifDot');
+                    if (dot) dot.style.display = 'block';
+                }
+            }, (error) => {
+                console.error('Error listening to posts:', error);
+                document.getElementById('feedContainer').innerHTML = '<div class="loading">ডেটা লোড করা যাচ্ছে না</div>';
+            });
+        }
+
+        // Start the app
+        window.addEventListener('load', () => {
+            const savedTheme = localStorage.getItem(THEME_KEY) || 'pink';
+            applyTheme(savedTheme);
+            startListening();
+            initPushNotifications();
+
+            // Keep the loading animation on screen for a moment, then reveal the app
+            setTimeout(hideLoadingScreen, 2200);
+        });
+    </script>
+</body>
+</html>
