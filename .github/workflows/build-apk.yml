@@ -31,18 +31,23 @@ jobs:
       - name: Add Android platform
         run: npx cap add android
 
-      # Only runs if you added google-services.json as a GitHub secret (see SETUP_GUIDE.md).
-      # Needed for push notifications (FCM) to work.
+      # Writes google-services.json only if you added the GOOGLE_SERVICES_JSON
+      # GitHub secret (see SETUP_GUIDE.md). Needed for push notifications (FCM).
       - name: Add Firebase google-services.json
-        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-        run: echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" > android/app/google-services.json
+            echo "HAS_FIREBASE=true" >> "$GITHUB_ENV"
+          else
+            echo "HAS_FIREBASE=false" >> "$GITHUB_ENV"
+          fi
 
       # Wires up the Google Services Gradle plugin so google-services.json is
       # picked up and push notifications (FCM) actually work.
       - name: Enable Google Services Gradle plugin
-        if: ${{ secrets.GOOGLE_SERVICES_JSON != '' }}
+        if: env.HAS_FIREBASE == 'true'
         run: |
           sed -i "s#dependencies {#dependencies {\n        classpath 'com.google.gms:google-services:4.4.2'#" android/build.gradle
           echo "apply plugin: 'com.google.gms.google-services'" >> android/app/build.gradle
